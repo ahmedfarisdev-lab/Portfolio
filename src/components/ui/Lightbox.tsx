@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState, useCallback } from 'react'
+import NextImage from 'next/image'
 import type { WorkItem } from '@/types'
 import { useLang } from '@/hooks/useLang'
 
@@ -123,13 +124,16 @@ export function Lightbox({ item, onClose, onPrev, onNext }: Props) {
           style={{ background: '#040404' }}
         >
           {images.length > 0 ? (
-            <img
-              key={activeImg}
-              src={images[activeImg]}
-              alt={item.titleEn}
-              className="w-full h-full object-contain"
-              style={{ animation: 'fadeImg .3s ease forwards' }}
-            />
+            <div key={activeImg} className="relative w-full h-full" style={{ animation: 'fadeImg .3s ease forwards' }}>
+              <NextImage
+                src={images[activeImg]}
+                alt={item.titleEn || 'Work'}
+                fill
+                sizes="100vw"
+                className="object-contain"
+                priority={activeImg === 0}
+              />
+            </div>
           ) : (
             <div className={`absolute inset-0 ${item.bgClass}`}>
               <LbArt item={item} />
@@ -185,7 +189,9 @@ export function Lightbox({ item, onClose, onPrev, onNext }: Props) {
                     }`}
                   style={{ width: 'clamp(44px,8vw,64px)', height: 'clamp(44px,8vw,64px)' }}
                 >
-                  <img src={img} alt="" className="w-full h-full object-cover" />
+                  <div className="relative w-full h-full">
+                    <NextImage src={img} alt="" fill sizes="80px" className="object-cover" loading="lazy" />
+                  </div>
                 </button>
               ))}
             </div>
@@ -251,10 +257,13 @@ export function Lightbox({ item, onClose, onPrev, onNext }: Props) {
           style={{ minHeight: '220px' }}
         >
           {item.image ? (
-            <img
+            <NextImage
               src={item.image}
-              alt={item.titleEn}
-              className="absolute inset-0 w-full h-full object-cover"
+              alt={item.titleEn || 'Work'}
+              fill
+              sizes="(max-width: 640px) 100vw, 54vw"
+              className="object-cover"
+              priority
             />
           ) : (
             <LbArt item={item} />

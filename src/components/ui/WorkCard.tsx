@@ -1,4 +1,5 @@
 'use client'
+import NextImage from 'next/image'
 import { useLang } from '@/hooks/useLang'
 import type { WorkItem } from '@/types'
 
@@ -40,12 +41,13 @@ export function WorkCard({ item, index, onClick, delay = 0 }: Props) {
       {/* الخلفية والصورة */}
       <div className={`w-full h-full relative overflow-hidden transition-transform duration-[600ms] group-hover:scale-[1.02] ${item.bgClass}`}>
         {item.image ? (
-          <img
+          <NextImage
             src={item.image}
-            alt={item.titleEn}
+            alt={item.titleEn || 'Work'}
+            fill
+            sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
+            className="object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500"
             loading="lazy"
-            decoding="async"
-            className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500"
           />
         ) : (
           <ArtSVG item={item} index={index} />
