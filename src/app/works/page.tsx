@@ -1,5 +1,5 @@
 'use client'
-import { useState, useMemo, useCallback, useEffect } from 'react'
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useLang } from '@/hooks/useLang'
 import { allWorks, workCounts } from '@/data/works'
@@ -15,14 +15,21 @@ const FILTERS = [
   { key:'poster' as Filter, en:'Social Posts',   ar:'بوستات' },
 ]
 
+const PAGE_SIZE = 24 // عدد الكروت في كل تحميل
+
 export default function WorksPage() {
   const { tr, lang, isAR, toggle } = useLang()
   const [filter, setFilter] = useState<Filter>('all')
   const [listView, setListView] = useState(false)
   const [active,  setActive]  = useState<WorkItem | null>(null)
   const [mounted, setMounted] = useState(false)
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const loaderRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => { const t = setTimeout(() => setMounted(true), 60); return () => clearTimeout(t) }, [])
+
+  // إعادة ضبط الـ visibleCount عند تغيير الفلتر
+  useEffect(() => { setVisibleCount(PAGE_SIZE) }, [filter])
 
   const anim = (i: number): React.CSSProperties => ({
     opacity: mounted ? 1 : 0,
@@ -33,6 +40,26 @@ export default function WorksPage() {
   const filtered = useMemo(() =>
     filter === 'all' ? allWorks : allWorks.filter(w => w.category === filter),
   [filter])
+
+  // الكروت المرئية فقط
+  const visible = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount])
+  const hasMore = visibleCount < filtered.length
+
+  // Intersection Observer لتحميل المزيد تلقائياً عند الوصول للنهاية
+  useEffect(() => {
+    const el = loaderRef.current
+    if (!el || !hasMore) return
+    const obs = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount(prev => Math.min(prev + PAGE_SIZE, filtered.length))
+        }
+      },
+      { rootMargin: '300px' }
+    )
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [hasMore, filtered.length])
 
   const handleOpen  = useCallback((item: WorkItem) => setActive(item), [])
   const handleClose = useCallback(() => setActive(null), [])
@@ -158,11 +185,27 @@ export default function WorksPage() {
             </div>
           </div>
         ) : (
-          <div className={`gallery-grid${listView ? ' list-view' : ''}`}>
-            {filtered.map((item, i) => (
-              <WorkCard key={item.id} item={item} index={i} onClick={handleOpen} delay={(i % 20) * 0.05} />
-            ))}
-          </div>
+          <>
+            <div className={`gallery-grid${listView ? ' list-view' : ''}`}>
+              {visible.map((item, i) => (
+                <WorkCard key={`${item.id}-${i}`} item={item} index={i} onClick={handleOpen} delay={(i % 12) * 0.04} />
+              ))}
+            </div>
+
+            {/* Infinite scroll trigger + loading indicator */}
+            {hasMore && (
+              <div ref={loaderRef} className="flex flex-col items-center gap-4 pt-16 pb-4">
+                <div className="flex gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent animate-bounce" style={{ animationDelay: '300ms' }} />
+                </div>
+                <span className="font-mono text-[8px] tracking-[3px] uppercase text-muted">
+                  {tr(`${filtered.length - visibleCount} more`, `${filtered.length - visibleCount} متبقية`)}
+                </span>
+              </div>
+            )}
+          </>
         )}
       </main>
 

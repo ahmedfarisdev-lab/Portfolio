@@ -443,6 +443,9 @@ video {
 .pointer-events-auto{
   pointer-events: auto;
 }
+.visible{
+  visibility: visible;
+}
 .fixed{
   position: fixed;
 }
@@ -879,6 +882,19 @@ video {
 .transform{
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
+@keyframes bounce{
+  0%, 100%{
+    transform: translateY(-25%);
+    animation-timing-function: cubic-bezier(0.8,0,1,1);
+  }
+  50%{
+    transform: none;
+    animation-timing-function: cubic-bezier(0,0,0.2,1);
+  }
+}
+.animate-bounce{
+  animation: bounce 1s infinite;
+}
 .cursor-default{
   cursor: default;
 }
@@ -1193,6 +1209,9 @@ video {
 .pb-24{
   padding-bottom: 6rem;
 }
+.pb-4{
+  padding-bottom: 1rem;
+}
 .pl-4{
   padding-left: 1rem;
 }
@@ -1213,6 +1232,9 @@ video {
 }
 .pt-14{
   padding-top: 3.5rem;
+}
+.pt-16{
+  padding-top: 4rem;
 }
 .pt-3{
   padding-top: 0.75rem;
@@ -1751,7 +1773,11 @@ body.lang-ar .skill-bar-fill {
   overflow: hidden;
   background: var(--card);
   cursor: pointer;
-  aspect-ratio: 3/4
+  aspect-ratio: 3/4;
+  /* تحسين الأداء: تجاهل الرسم للكروت البعيدة عن الشاشة */
+  content-visibility: auto;
+  contain-intrinsic-size: 0 400px;
+  will-change: transform;
 }
 
 .work-card[data-cat='brand'] {

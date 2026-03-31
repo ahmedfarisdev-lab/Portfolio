@@ -281,7 +281,11 @@ body.lang-ar .skill-bar-fill {
   overflow: hidden;
   background: var(--card);
   cursor: pointer;
-  aspect-ratio: 3/4
+  aspect-ratio: 3/4;
+  /* تحسين الأداء: تجاهل الرسم للكروت البعيدة عن الشاشة */
+  content-visibility: auto;
+  contain-intrinsic-size: 0 400px;
+  will-change: transform;
 }
 
 .work-card[data-cat='brand'] {

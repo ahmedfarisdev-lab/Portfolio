@@ -43,6 +43,8 @@ export function WorkCard({ item, index, onClick, delay = 0 }: Props) {
           <img
             src={item.image}
             alt={item.titleEn}
+            loading="lazy"
+            decoding="async"
             className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500"
           />
         ) : (
